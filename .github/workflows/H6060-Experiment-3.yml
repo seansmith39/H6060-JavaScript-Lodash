@@ -1,0 +1,111 @@
+name: H6060 Experiment 3 - Lodash
+
+on:
+  workflow_dispatch:
+    inputs:
+      sca-snyk-enabled:
+        description: Enable Snyk scan (SCA)
+        type: boolean
+        required: false
+        default: true
+
+      sca-owasp-dependency-check-enabled:
+        description: Enable OWASP Dependency Check scan (SCA)
+        type: boolean
+        required: false
+        default: true
+
+      sca-grype-enabled:
+        description: Enable Grype scan (SCA)
+        type: boolean
+        required: false
+        default: true
+
+      sast-sonarqube-enabled:
+        description: Enable SonarQube scan (SAST)
+        type: boolean
+        required: false
+        default: true
+
+      sast-semgrep-enabled:
+        description: Enable Semgrep scan (SAST)
+        type: boolean
+        required: false
+        default: true
+
+      sast-deepsource-enabled:
+        description: Enable Deepsource scan (SAST)
+        type: boolean
+        required: false
+        default: true
+
+      sast-horusec-enabled:
+        description: Enable Horusec scan (SAST)
+        type: boolean
+        required: false
+        default: true
+
+      sast-codeql-enabled:
+        description: Enable CodeQL scan (SAST)
+        type: boolean
+        required: false
+        default: true
+
+      sast-snyk-code-enabled:
+        description: Enable Snyk Code scan (SAST)
+        type: boolean
+        required: false
+        default: true
+
+defaults:
+  run:
+    shell: bash
+
+permissions: write-all
+
+jobs:
+  build-application:
+    name: Build Application
+    runs-on: ubuntu-latest
+    steps:
+      # Branched from tag 4.17.16
+      - name: Checkout
+        uses: actions/checkout@v4.1.7
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4.0.2
+        with:
+          node-version: 16.x
+
+      - name: Install Node Dependencies
+        uses: Adzz/jest_test_action@v2.0.0
+        with:
+          package-manager: npm
+          command: ci
+
+      - name: Build Node Application
+        uses: Adzz/jest_test_action@v2.0.0
+        with:
+          package-manager: npm
+          command: run build
+
+      - name: Test Node Application
+        uses: Adzz/jest_test_action@v2.0.0
+        with:
+          package-manager: npm
+          command: run test
+
+      - name: Package Node Application
+        uses: Adzz/jest_test_action@v2.0.0
+        with:
+          package-manager: npm
+          command: pack
+
+      - name: Upload Node Package
+        uses: actions/upload-artifact@v4
+        with:
+          name: node-build
+          path: lodash-4.17.16.tgz
+          if-no-files-found: error
